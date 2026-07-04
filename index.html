@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Final Year Command Deck</title>
+<style>
+  :root{
+    --bg: #14110F;
+    --bg-elevated: #1C1815;
+    --bg-card: #1F1B17;
+    --rose-gold: #C08A6E;
+    --rose-gold-bright: #D9A582;
+    --rose-gold-dim: #8A6456;
+    --text: #EDE3DC;
+    --text-dim: #A69890;
+    --text-faint: #6E6259;
+    --border: #2C2622;
+    --border-soft: #241F1B;
+    --danger: #C0604A;
+    --danger-bg: #2A1815;
+    --safe: #7C9B79;
+    --safe-bg: #171C16;
+    --warning: #C99A4A;
+    --warning-bg: #231C13;
+    --radius: 3px;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio', P052, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Helvetica, Arial, sans-serif;
+    --mono: 'SF Mono', 'IBM Plex Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: radial-gradient(circle at 15% 8%, rgba(192,138,110,0.06), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .app{ display:flex; min-height:100vh; position:relative; z-index:1; }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    width: 236px;
+    flex-shrink:0;
+    background: var(--bg-elevated);
+    border-right:1px solid var(--border-soft);
+    padding: 28px 18px;
+    display:flex;
+    flex-direction:column;
+    gap: 4px;
+  }
+  .nav-brand{
+    font-family: var(--serif);
+    font-size: 21px;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    margin: 0 8px 4px 8px;
+    font-style: italic;
+  }
+  .nav-sub{
+    font-size: 10.5px;
+    color: var(--text-faint);
+    margin: 0 8px 28px 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    cursor:pointer;
+    font-size: 14px;
+    border: 1px solid transparent;
+    transition: all .15s ease;
+  }
+  .nav-item:hover{ color: var(--text); background: rgba(192,138,110,0.06); }
+  .nav-item.active{
+    color: var(--rose-gold-bright);
+    background: rgba(192,138,110,0.10);
+    border-color: rgba(192,138,110,0.25);
+  }
+  .nav-item .count{
+    margin-left:auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .nav-item.active .count{ color: var(--rose-gold-dim); }
+  .nav-footer{
+    margin-top:auto;
+    padding: 12px 8px 4px;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    line-height: 1.6;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  /* ---------- MAIN ---------- */
+  .main{ flex:1; padding: 36px 44px 60px; max-width: 980px; }
+  .page-title{
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    margin: 0 0 6px 0;
+    color: var(--text);
+  }
+  .page-desc{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    margin: 0 0 28px 0;
+  }
+
+  /* ---------- HERO / NEXT UP ---------- */
+  .hero{
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 22px 26px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-label{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--rose-gold-dim);
+    margin-bottom: 10px;
+  }
+  .hero-title{
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text);
+    margin: 0 0 4px;
+  }
+  .hero-meta{ color: var(--text-dim); font-size: 13px; }
+  .hero-empty{ color: var(--text-dim); font-size: 14px; font-style: italic; }
+  .hero-countdown{
+    position:absolute; right: 26px; top: 20px;
+    font-family: var(--mono);
+    font-size: 34px;
+    color: var(--rose-gold-bright);
+    text-align:right;
+    line-height:1;
+  }
+  .hero-countdown span{
+    display:block;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-faint);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  /* ---------- SUMMARY GRID ---------- */
+  .grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+  .stat-card{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 16px 14px;
+  }
+  .stat-num{ font-family: var(--mono); font-size: 26px; color: var(--text); }
+  .stat-num.danger{ color: var(--danger); }
+  .stat-num.safe{ color: var(--safe); }
+  .stat-num.warning{ color: var(--warning); }
+  .stat-label{ font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ---------- SECTION ---------- */
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .section-head h2{
+    font-family: var(--serif); font-style: italic;
+    font-size: 17px; color: var(--text); margin:0;
+  }
+
+  /* ---------- FORM ROW ---------- */
+  .add-bar{
+    display:flex; gap:8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  input, select, textarea{
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 11px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    font-family: var(--sans);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline: none;
+    border-color: var(--rose-gold-dim);
+  }
+  input::placeholder{ color: var(--text-faint); }
+  .add-bar input[type="text"]{ flex: 2; min-width: 160px; }
+  .add-bar input[type="date"]{ color-scheme: dark; }
+  button{
+    background: var(--rose-gold-dim);
+    color: var(--text);
+    border: none;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background .15s ease;
+    font-family: var(--sans);
+  }
+  button:hover{ background: var(--rose-gold); }
+  button.ghost{
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  button.ghost:hover{ border-color: var(--rose-gold-dim); color: var(--rose-gold-bright); background: transparent; }
+  button.icon-btn{
+    background: transparent;
+    padding: 4px 8px;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  button.icon-btn:hover{ color: var(--danger); background: transparent; }
+
+  /* ---------- TASK CARD (tension bar signature) ---------- */
+  .task{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .task.done{ opacity: 0.45; }
+  .task-top{ display:flex; justify-content:space-between; align-items:flex-start; gap: 12px; }
+  .task-title{ font-size: 14.5px; color: var(--text); }
+  .task.done .task-title{ text-decoration: line-through; }
+  .task-tags{ display:flex; gap:6px; margin-top: 6px; flex-wrap: wrap; }
+  .tag{
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .task-due{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .task-actions{ display:flex; gap: 2px; align-items:center; }
+  .tension-track{
+    height: 3px;
+    background: var(--border-soft);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .tension-fill{ height: 100%; border-radius: 2px; transition: width .3s ease; }
+
+  /* ---------- ATTENDANCE ---------- */
+  .attend-card{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .attend-top{ display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+  .attend-name{ font-size: 15px; color: var(--text); }
+  .attend-pct{ font-family: var(--mono); font-size: 18px; }
+  .attend-bar-track{ height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden; margin-bottom: 10px;}
+  .attend-bar-fill{ height: 100%; border-radius: 3px; transition: width .3s ease; }
+  .attend-controls{ display:flex; gap: 8px; align-items:center; font-size: 12.5px; color: var(--text-dim); }
+  .attend-controls button{ padding: 5px 10px; font-size: 12px; }
+  .attend-num{ font-family: var(--mono); color: var(--text); }
+
+  /* ---------- MARKS ---------- */
+  .subject-block{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 12px;
+  }
+  .subject-block-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;}
+  .subject-name{ font-size: 15px; color: var(--text); }
+  .subject-avg{ font-family: var(--mono); font-size: 13px; color: var(--rose-gold-bright); }
+  .mark-row{ display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-top: 1px solid var(--border-soft); font-size: 13px; }
+  .mark-row:first-of-type{ border-top: none; }
+  .mark-row .mtype{ color: var(--text-dim); }
+  .mark-row .mscore{ font-family: var(--mono); color: var(--text); }
+
+  /* ---------- MILESTONES ---------- */
+  .milestone{
+    display:flex; gap: 12px; align-items:flex-start;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .milestone:first-child{ border-top: none; }
+  .m-check{
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--rose-gold-dim);
+    flex-shrink:0; margin-top: 2px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size: 11px; color: transparent;
+  }
+  .m-check.checked{ background: var(--rose-gold-dim); color: var(--bg); }
+  .m-body{ flex:1; }
+  .m-title{ font-size: 14px; color: var(--text); }
+  .m-title.checked{ text-decoration: line-through; color: var(--text-faint); }
+  .m-meta{ font-size: 11.5px; color: var(--text-faint); margin-top: 3px; font-family: var(--mono); }
+  .m-notes{ font-size: 12.5px; color: var(--text-dim); margin-top: 4px; }
+
+  .empty-state{
+    text-align:center; padding: 40px 20px; color: var(--text-faint); font-size: 13.5px;
+    border: 1px dashed var(--border); border-radius: var(--radius);
+  }
+
+  .hidden{ display:none !important; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 820px){
+    .app{ flex-direction: column; }
+    .nav{
+      width: 100%; flex-direction: row; overflow-x: auto;
+      padding: 14px 12px; align-items:center; gap: 6px;
+      border-right:none; border-bottom: 1px solid var(--border-soft);
+    }
+    .nav-brand, .nav-sub, .nav-footer{ display:none; }
+    .nav-item{ flex-shrink:0; }
+    .main{ padding: 24px 18px 50px; }
+    .grid{ grid-template-columns: repeat(2, 1fr); }
+    .hero-countdown{ position: static; margin-top: 12px; text-align:left; }
+  }
+
+  :focus-visible{ outline: 2px solid var(--rose-gold); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav">
+    <div class="nav-brand">Ledger</div>
+    <div class="nav-sub">S7 · KTU Final Year</div>
+    <div class="nav-item active" data-view="dashboard">◆ Dashboard</div>
+    <div class="nav-item" data-view="deadlines">◆ Deadlines <span class="count" id="count-deadlines"></span></div>
+    <div class="nav-item" data-view="attendance">◆ Attendance</div>
+    <div class="nav-item" data-view="marks">◆ Marks</div>
+    <div class="nav-item" data-view="project">◆ Project &amp; Seminar</div>
+    <div class="nav-footer">Stored only on this device.<br>No sync, no accounts, no leaks.</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard">
+      <h1 class="page-title">Everything, in one place</h1>
+      <p class="page-desc">One glance, not five apps.</p>
+
+      <div class="hero" id="hero"></div>
+
+      <div class="grid" id="stat-grid"></div>
+
+      <div class="section-head"><h2>Due this week</h2></div>
+      <div id="dash-week-list"></div>
+    </section>
+
+    <!-- DEADLINES -->
+    <section id="view-deadlines" class="hidden">
+      <h1 class="page-title">Deadlines &amp; submissions</h1>
+      <p class="page-desc">Assignments, series exams, lab records, anything with a due date.</p>
+
+      <div class="add-bar">
+        <input type="text" id="dl-title" placeholder="What's due? e.g. Data Analytics assignment 2">
+        <input type="text" id="dl-subject" placeholder="Subject" style="max-width:150px;">
+        <select id="dl-type">
+          <option value="Assignment">Assignment</option>
+          <option value="Submission">Submission</option>
+          <option value="Exam">Exam</option>
+          <option value="Lab">Lab record</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="date" id="dl-date">
+        <button onclick="addDeadline()">Add</button>
+      </div>
+
+      <div id="deadline-list"></div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="view-attendance" class="hidden">
+      <h1 class="page-title">Attendance</h1>
+      <p class="page-desc">KTU minimum is 75% to sit for exams. Track the margin before it becomes a problem.</p>
+
+      <div class="add-bar">
+        <input type="text" id="att-subject" placeholder="Subject name">
+        <button onclick="addSubjectAttendance()">Add subject</button>
+      </div>
+
+      <div id="attendance-list"></div>
+    </section>
+
+    <!-- MARKS -->
+    <section id="view-marks" class="hidden">
+      <h1 class="page-title">Marks</h1>
+      <p class="page-desc">Internal assessments, series tests, assignment scores — per subject.</p>
+
+      <div class="add-bar">
+        <input type="text" id="mk-subject" placeholder="Subject name">
+        <button onclick="addSubjectMarks()">Add subject</button>
+      </div>
+
+      <div id="marks-list"></div>
+    </section>
+
+    <!-- PROJECT & SEMINAR -->
+    <section id="view-project" class="hidden">
+      <h1 class="page-title">Project &amp; seminar</h1>
+      <p class="page-desc">Since your seminar topic is tied to your project, milestones for both live together here.</p>
+
+      <div class="add-bar">
+        <input type="text" id="pj-title" placeholder="Milestone e.g. Finalise project topic">
+        <input type="date" id="pj-date">
+        <button onclick="addMilestone()">Add</button>
+      </div>
+
+      <div id="milestone-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ============ STATE ============ */
+const STORAGE_KEY = 'ledgerAppState_v1';
+
+function defaultState(){
+  return {
+    deadlines: [
+      // {id, title, subject, type, date, done}
+    ],
+    attendance: [
+      // {id, subject, total, attended}
+    ],
+    marks: [
+      // {id, subject, entries: [{id, type, score, max}]}
+    ],
+    milestones: [
+      {id: uid(), title: 'Finalise project topic', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Confirm seminar topic (from project)', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Guide allocation / approval', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Review 1', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Review 2', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Seminar presentation', date: '', done: false, notes: ''},
+      {id: uid(), title: 'Final project submission', date: '', done: false, notes: ''},
+    ]
+  };
+}
+
+function uid(){ return Math.random().toString(36).slice(2, 10); }
+
+let state;
+try {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  state = raw ? JSON.parse(raw) : defaultState();
+} catch(e){
+  state = defaultState();
+}
+
+function save(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('Could not save — storage may be unavailable in this preview.', e); }
+}
+
+/* ============ NAV ============ */
+const views = ['dashboard','deadlines','attendance','marks','project'];
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const v = item.dataset.view;
+    views.forEach(x => {
+      document.getElementById('view-'+x).classList.toggle('hidden', x !== v);
+    });
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === v));
+    renderAll();
+  });
+});
+
+/* ============ HELPERS ============ */
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.round((d - today) / 86400000);
+}
+
+function urgencyColor(days){
+  if(days === null) return 'var(--text-faint)';
+  if(days < 0) return 'var(--danger)';
+  if(days <= 2) return 'var(--danger)';
+  if(days <= 5) return 'var(--warning)';
+  return 'var(--rose-gold-dim)';
+}
+
+function tensionWidth(days){
+  if(days === null) return '0%';
+  if(days < 0) return '100%';
+  const capped = Math.min(days, 14);
+  return (100 - (capped/14)*100) + '%';
+}
+
+function fmtDate(dateStr){
+  if(!dateStr) return 'no date';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+}
+
+function dueLabel(days){
+  if(days === null) return '';
+  if(days < 0) return `${Math.abs(days)}d overdue`;
+  if(days === 0) return 'due today';
+  if(days === 1) return 'due tomorrow';
+  return `in ${days}d`;
+}
+
+/* ============ DEADLINES ============ */
+function addDeadline(){
+  const title = document.getElementById('dl-title').value.trim();
+  const subject = document.getElementById('dl-subject').value.trim();
+  const type = document.getElementById('dl-type').value;
+  const date = document.getElementById('dl-date').value;
+  if(!title){ return; }
+  state.deadlines.push({id: uid(), title, subject, type, date, done:false});
+  document.getElementById('dl-title').value = '';
+  document.getElementById('dl-subject').value = '';
+  document.getElementById('dl-date').value = '';
+  save(); renderAll();
+}
+
+function toggleDeadline(id){
+  const d = state.deadlines.find(x=>x.id===id);
+  if(d){ d.done = !d.done; save(); renderAll(); }
+}
+
+function deleteDeadline(id){
+  state.deadlines = state.deadlines.filter(x=>x.id!==id);
+  save(); renderAll();
+}
+
+function renderDeadlines(){
+  const list = document.getElementById('deadline-list');
+  const items = [...state.deadlines].sort((a,b) => {
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    return (a.date || '9999').localeCompare(b.date || '9999');
+  });
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty-state">Nothing tracked yet. Add your first deadline above — even the small ones count.</div>';
+    return;
+  }
+  list.innerHTML = items.map(d => {
+    const days = daysUntil(d.date);
+    const color = urgencyColor(days);
+    return `
+      <div class="task ${d.done ? 'done':''}">
+        <div class="task-top">
+          <div>
+            <div class="task-title">${escapeHtml(d.title)}</div>
+            <div class="task-tags">
+              ${d.subject ? `<span class="tag">${escapeHtml(d.subject)}</span>` : ''}
+              <span class="tag">${d.type}</span>
+            </div>
+          </div>
+          <div style="text-align:right; display:flex; align-items:center; gap:6px;">
+            <div>
+              <div class="task-due">${d.date ? fmtDate(d.date) : 'no date'}</div>
+              ${!d.done && days!==null ? `<div class="task-due" style="color:${color}">${dueLabel(days)}</div>` : ''}
+            </div>
+            <div class="task-actions">
+              <button class="icon-btn" onclick="toggleDeadline('${d.id}')" title="Mark done">${d.done?'↺':'✓'}</button>
+              <button class="icon-btn" onclick="deleteDeadline('${d.id}')" title="Delete">✕</button>
+            </div>
+          </div>
+        </div>
+        ${!d.done ? `<div class="tension-track"><div class="tension-fill" style="width:${tensionWidth(days)}; background:${color};"></div></div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============ ATTENDANCE ============ */
+function addSubjectAttendance(){
+  const subject = document.getElementById('att-subject').value.trim();
+  if(!subject) return;
+  state.attendance.push({id: uid(), subject, total: 0, attended: 0});
+  document.getElementById('att-subject').value = '';
+  save(); renderAll();
+}
+
+function bumpAttendance(id, field, delta){
+  const a = state.attendance.find(x=>x.id===id);
+  if(!a) return;
+  if(field === 'total'){
+    a.total = Math.max(0, a.total + delta);
+    if(a.attended > a.total) a.attended = a.total;
+  } else {
+    a.attended = Math.max(0, Math.min(a.total, a.attended + delta));
+  }
+  save(); renderAll();
+}
+
+function deleteAttendance(id){
+  state.attendance = state.attendance.filter(x=>x.id!==id);
+  save(); renderAll();
+}
+
+function renderAttendance(){
+  const list = document.getElementById('attendance-list');
+  if(state.attendance.length === 0){
+    list.innerHTML = '<div class="empty-state">Add a subject to start logging classes attended vs. held.</div>';
+    return;
+  }
+  list.innerHTML = state.attendance.map(a => {
+    const pct = a.total > 0 ? Math.round((a.attended / a.total) * 100) : 100;
+    const short = a.total - a.attended;
+    const color = pct >= 80 ? 'var(--safe)' : pct >= 75 ? 'var(--warning)' : 'var(--danger)';
+    return `
+      <div class="attend-card">
+        <div class="attend-top">
+          <div class="attend-name">${escapeHtml(a.subject)}</div>
+          <div class="attend-pct" style="color:${color}">${a.total>0 ? pct+'%' : '—'}</div>
+        </div>
+        <div class="attend-bar-track"><div class="attend-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+        <div class="attend-controls">
+          <span>Held: <span class="attend-num">${a.total}</span></span>
+          <button class="ghost" onclick="bumpAttendance('${a.id}','total',1)">+ class held</button>
+          <span style="margin-left:10px;">Attended: <span class="attend-num">${a.attended}</span></span>
+          <button class="ghost" onclick="bumpAttendance('${a.id}','attended',1)">+ present</button>
+          <button class="ghost" onclick="bumpAttendance('${a.id}','attended',-1)">− correct</button>
+          <button class="icon-btn" style="margin-left:auto;" onclick="deleteAttendance('${a.id}')" title="Delete">✕</button>
+        </div>
+        ${a.total>0 && pct < 75 ? `<div style="color:var(--danger); font-size:11.5px; margin-top:8px;">Below 75% — you need ${Math.ceil((0.75*a.total - a.attended)/(0.25))} more straight classes to recover, roughly.</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============ MARKS ============ */
+function addSubjectMarks(){
+  const subject = document.getElementById('mk-subject').value.trim();
+  if(!subject) return;
+  state.marks.push({id: uid(), subject, entries: []});
+  document.getElementById('mk-subject').value = '';
+  save(); renderAll();
+}
+
+function addMarkEntry(subjId){
+  const type = prompt('Assessment name (e.g. Series Test 1, Assignment 1):');
+  if(!type) return;
+  const score = parseFloat(prompt('Score obtained:'));
+  const max = parseFloat(prompt('Out of (max marks):'));
+  if(isNaN(score) || isNaN(max)) return;
+  const subj = state.marks.find(x=>x.id===subjId);
+  subj.entries.push({id: uid(), type, score, max});
+  save(); renderAll();
+}
+
+function deleteMarkEntry(subjId, entryId){
+  const subj = state.marks.find(x=>x.id===subjId);
+  subj.entries = subj.entries.filter(e=>e.id!==entryId);
+  save(); renderAll();
+}
+
+function deleteSubjectMarks(subjId){
+  state.marks = state.marks.filter(x=>x.id!==subjId);
+  save(); renderAll();
+}
+
+function renderMarks(){
+  const list = document.getElementById('marks-list');
+  if(state.marks.length === 0){
+    list.innerHTML = '<div class="empty-state">Add a subject to start logging series tests and assignment scores.</div>';
+    return;
+  }
+  list.innerHTML = state.marks.map(subj => {
+    const totalScore = subj.entries.reduce((s,e)=>s+e.score,0);
+    const totalMax = subj.entries.reduce((s,e)=>s+e.max,0);
+    const avg = totalMax > 0 ? Math.round((totalScore/totalMax)*100) : null;
+    return `
+      <div class="subject-block">
+        <div class="subject-block-top">
+          <div class="subject-name">${escapeHtml(subj.subject)}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            ${avg!==null ? `<div class="subject-avg">${avg}% avg</div>` : ''}
+            <button class="ghost" onclick="addMarkEntry('${subj.id}')">+ score</button>
+            <button class="icon-btn" onclick="deleteSubjectMarks('${subj.id}')" title="Delete subject">✕</button>
+          </div>
+        </div>
+        ${subj.entries.length === 0
+          ? '<div style="color:var(--text-faint); font-size:12.5px;">No scores logged yet.</div>'
+          : subj.entries.map(e => `
+            <div class="mark-row">
+              <span class="mtype">${escapeHtml(e.type)}</span>
+              <span style="display:flex; align-items:center; gap:10px;">
+                <span class="mscore">${e.score} / ${e.max}</span>
+                <button class="icon-btn" onclick="deleteMarkEntry('${subj.id}','${e.id}')">✕</button>
+              </span>
+            </div>
+          `).join('')
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============ PROJECT & SEMINAR MILESTONES ============ */
+function addMilestone(){
+  const title = document.getElementById('pj-title').value.trim();
+  const date = document.getElementById('pj-date').value;
+  if(!title) return;
+  state.milestones.push({id: uid(), title, date, done:false, notes:''});
+  document.getElementById('pj-title').value = '';
+  document.getElementById('pj-date').value = '';
+  save(); renderAll();
+}
+
+function toggleMilestone(id){
+  const m = state.milestones.find(x=>x.id===id);
+  if(m){ m.done = !m.done; save(); renderAll(); }
+}
+
+function editMilestoneNotes(id){
+  const m = state.milestones.find(x=>x.id===id);
+  const notes = prompt('Notes for "'+m.title+'":', m.notes || '');
+  if(notes !== null){ m.notes = notes; save(); renderAll(); }
+}
+
+function deleteMilestone(id){
+  state.milestones = state.milestones.filter(x=>x.id!==id);
+  save(); renderAll();
+}
+
+function renderMilestones(){
+  const list = document.getElementById('milestone-list');
+  if(state.milestones.length === 0){
+    list.innerHTML = '<div class="empty-state">No milestones yet.</div>';
+    return;
+  }
+  list.innerHTML = state.milestones.map(m => `
+    <div class="milestone">
+      <div class="m-check ${m.done?'checked':''}" onclick="toggleMilestone('${m.id}')">✓</div>
+      <div class="m-body">
+        <div class="m-title ${m.done?'checked':''}">${escapeHtml(m.title)}</div>
+        <div class="m-meta">${m.date ? fmtDate(m.date) : 'no target date'} · <a href="#" onclick="editMilestoneNotes('${m.id}'); return false;" style="color:var(--rose-gold-dim);">notes</a> · <a href="#" onclick="deleteMilestone('${m.id}'); return false;" style="color:var(--text-faint);">remove</a></div>
+        ${m.notes ? `<div class="m-notes">${escapeHtml(m.notes)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============ DASHBOARD ============ */
+function renderDashboard(){
+  const upcoming = state.deadlines
+    .filter(d => !d.done)
+    .map(d => ({...d, days: daysUntil(d.date)}))
+    .filter(d => d.days !== null)
+    .sort((a,b) => a.days - b.days);
+
+  const nextMilestone = state.milestones
+    .filter(m => !m.done && m.date)
+    .map(m => ({...m, days: daysUntil(m.date)}))
+    .sort((a,b)=>a.days-b.days)[0];
+
+  const hero = document.getElementById('hero');
+  const next = upcoming[0];
+  if(next){
+    const color = urgencyColor(next.days);
+    hero.innerHTML = `
+      <div class="hero-label">Next up</div>
+      <div class="hero-title">${escapeHtml(next.title)}</div>
+      <div class="hero-meta">${next.subject ? escapeHtml(next.subject)+' · ' : ''}${next.type}</div>
+      <div class="hero-countdown" style="color:${color}">${next.days < 0 ? Math.abs(next.days) : next.days}<span>${next.days < 0 ? 'days overdue' : next.days===0 ? 'today' : 'days left'}</span></div>
+    `;
+  } else {
+    hero.innerHTML = `<div class="hero-label">Next up</div><div class="hero-empty">Nothing on the clock right now. Add a deadline to start tracking.</div>`;
+  }
+
+  // stat grid
+  const pendingCount = state.deadlines.filter(d=>!d.done).length;
+  const overdueCount = upcoming.filter(d=>d.days<0).length;
+  const lowAttendance = state.attendance.filter(a => a.total>0 && (a.attended/a.total*100) < 75).length;
+  const doneMilestones = state.milestones.filter(m=>m.done).length;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${pendingCount}</div><div class="stat-label">Pending deadlines</div></div>
+    <div class="stat-card"><div class="stat-num ${overdueCount>0?'danger':''}">${overdueCount}</div><div class="stat-label">Overdue</div></div>
+    <div class="stat-card"><div class="stat-num ${lowAttendance>0?'danger':'safe'}">${lowAttendance}</div><div class="stat-label">Subjects below 75%</div></div>
+    <div class="stat-card"><div class="stat-num">${doneMilestones}/${state.milestones.length}</div><div class="stat-label">Project milestones done</div></div>
+  `;
+
+  const weekItems = upcoming.filter(d => d.days <= 7);
+  const weekList = document.getElementById('dash-week-list');
+  if(weekItems.length === 0){
+    weekList.innerHTML = '<div class="empty-state">Nothing due in the next 7 days.</div>';
+  } else {
+    weekList.innerHTML = weekItems.map(d => {
+      const color = urgencyColor(d.days);
+      return `
+        <div class="task">
+          <div class="task-top">
+            <div>
+              <div class="task-title">${escapeHtml(d.title)}</div>
+              <div class="task-tags">${d.subject?`<span class="tag">${escapeHtml(d.subject)}</span>`:''}<span class="tag">${d.type}</span></div>
+            </div>
+            <div class="task-due" style="color:${color}">${dueLabel(d.days)}</div>
+          </div>
+          <div class="tension-track"><div class="tension-fill" style="width:${tensionWidth(d.days)}; background:${color};"></div></div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('count-deadlines').textContent = pendingCount > 0 ? pendingCount : '';
+}
+
+/* ============ UTIL ============ */
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+/* ============ RENDER ALL ============ */
+function renderAll(){
+  renderDashboard();
+  renderDeadlines();
+  renderAttendance();
+  renderMarks();
+  renderMilestones();
+}
+
+renderAll();
+</script>
+</body>
+</html>
